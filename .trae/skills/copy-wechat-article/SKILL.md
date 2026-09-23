@@ -29,8 +29,10 @@ Template article (copy its HTML skeleton): `2026/07/31/flood-risk-checkup/index.
 ## 2. Download images to image/
 
 1. Save each content image as `image/<N>.<ext>` continuing from the current highest number in `image/` (e.g. next is 31). Use the extension from the source URL.
-2. Skip tiny decorative WeChat layout GIFs (a few hundred bytes, used only as spacer/divider padding). Only keep images that carry content (banner, section illustrations, logos, QR).
-3. Keep a map of source-image → local file so the remapped `src` in step 3 is correct.
+2. **Do NOT blanket-skip GIFs.** WeChat articles often build their visual layout out of many GIFs (section dividers AND horizontally-scrollable swipe strips). Download every distinct image; only discard a file if it is a pure spacer (verified < ~500 bytes). When GIFs repeat across the page, store each distinct GIF once and reuse it.
+3. **Preserve horizontal scroll strips.** WeChat "swipeable scroller" content is grouped in a flex container (the wrapper uses `display:flex` + `overflow-x`/`white-space:nowrap`). Recreate it in the page body with inline CSS: `<div style="display:flex;overflow-x:auto;white-space:nowrap;gap:7px;">` with each card `<img style="flex:0 0 auto;width:150px;border-radius:6px;">`. Keep the same number/order of images per strip as the original.
+4. Skip only genuine tiny decorative spacers (a few hundred bytes) that are pure dividers, not structural GIFs.
+5. Keep a map of source-image → local file so the remapped `src` in step 3 is correct.
 
 ## 3. Build the article page
 
