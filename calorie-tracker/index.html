@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>热量计算识别 - 智能食物热量分析</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部导航 -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="logo-icon">🔥</span>
+                <h1>热量计算识别</h1>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-page="home">
+                    <span class="nav-icon">📷</span>
+                    <span>识别</span>
+                </button>
+                <button class="nav-tab" data-page="history">
+                    <span class="nav-icon">📋</span>
+                    <span>历史</span>
+                </button>
+                <button class="nav-tab" data-page="stats">
+                    <span class="nav-icon">📊</span>
+                    <span>统计</span>
+                </button>
+                <button class="nav-tab" data-page="foods">
+                    <span class="nav-icon">🍎</span>
+                    <span>食物库</span>
+                </button>
+            </nav>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="app-main">
+            <!-- 首页 - 食物识别 -->
+            <section class="page page-home active" id="page-home">
+                <div class="hero-section">
+                    <h2>智能识别食物热量</h2>
+                    <p>上传或拍摄食物照片，AI 自动识别并计算营养成分</p>
+                </div>
+
+                <!-- 上传区域 -->
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                        <div class="upload-content">
+                            <div class="upload-icon">📸</div>
+                            <h3>拖拽图片到此处</h3>
+                            <p>或点击选择文件 / 拍摄照片</p>
+                            <button class="btn btn-primary" id="uploadBtn">
+                                <span>选择图片</span>
+                            </button>
+                        </div>
+                        <div class="upload-preview" id="uploadPreview" style="display:none;">
+                            <img id="previewImage" alt="预览图片">
+                            <button class="btn-remove" id="removeImage">✕</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 识别方式切换 -->
+                <div class="recognition-mode">
+                    <div class="mode-tabs">
+                        <button class="mode-tab active" data-mode="ai">
+                            <span>🤖 AI 图像识别</span>
+                        </button>
+                        <button class="mode-tab" data-mode="manual">
+                            <span>✋ 手动选择食物</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 手动选择食物区域 -->
+                <div class="manual-select" id="manualSelect" style="display:none;">
+                    <div class="search-box">
+                        <input type="text" id="foodSearch" placeholder="搜索食物名称...">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    <div class="category-filter">
+                        <button class="category-btn active" data-category="all">全部</button>
+                        <button class="category-btn" data-category="主食">主食</button>
+                        <button class="category-btn" data-category="肉类">肉类</button>
+                        <button class="category-btn" data-category="蔬菜">蔬菜</button>
+                        <button class="category-btn" data-category="水果">水果</button>
+                        <button class="category-btn" data-category="蛋奶">蛋奶</button>
+                        <button class="category-btn" data-category="零食">零食</button>
+                        <button class="category-btn" data-category="饮料">饮料</button>
+                    </div>
+                    <div class="food-grid" id="foodGrid">
+                        <!-- 食物列表由JS动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 识别按钮 -->
+                <div class="action-section">
+                    <button class="btn btn-large btn-primary" id="recognizeBtn" disabled>
+                        <span class="btn-icon">🔍</span>
+                        <span>开始识别</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 识别结果弹窗 -->
+            <div class="result-modal" id="resultModal" style="display:none;">
+                <div class="result-overlay"></div>
+                <div class="result-card">
+                    <button class="result-close" id="resultClose">✕</button>
+                    <div class="result-header">
+                        <div class="result-icon">✅</div>
+                        <h2>识别结果</h2>
+                        <p id="resultFoodName">食物名称</p>
+                    </div>
+                    
+                    <div class="result-image" id="resultImage">
+                        <img id="resultImg" alt="食物图片">
+                    </div>
+
+                    <div class="nutrition-main">
+                        <div class="calorie-display">
+                            <span class="calorie-value" id="resultCalories">0</span>
+                            <span class="calorie-unit">大卡</span>
+                            <span class="calorie-label">每 100 克</span>
+                        </div>
+                    </div>
+
+                    <div class="nutrition-details">
+                        <h3>营养成分</h3>
+                        <div class="nutrition-grid">
+                            <div class="nutrition-item">
+                                <div class="nutrition-bar protein">
+                                    <div class="bar-fill" id="proteinBar"></div>
+                                </div>
+                                <div class="nutrition-info">
+                                    <span class="nutrition-name">蛋白质</span>
+                                    <span class="nutrition-value" id="resultProtein">0g</span>
+                                </div>
+                            </div>
+                            <div class="nutrition-item">
+                                <div class="nutrition-bar carbs">
+                                    <div class="bar-fill" id="carbsBar"></div>
+                                </div>
+                                <div class="nutrition-info">
+                                    <span class="nutrition-name">碳水化合物</span>
+                                    <span class="nutrition-value" id="resultCarbs">0g</span>
+                                </div>
+                            </div>
+                            <div class="nutrition-item">
+                                <div class="nutrition-bar fat">
+                                    <div class="bar-fill" id="fatBar"></div>
+                                </div>
+                                <div class="nutrition-info">
+                                    <span class="nutrition-name">脂肪</span>
+                                    <span class="nutrition-value" id="resultFat">0g</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="serving-section">
+                        <h3>份量调整</h3>
+                        <div class="serving-control">
+                            <button class="serving-btn" id="servingMinus">−</button>
+                            <div class="serving-input-wrap">
+                                <input type="number" id="servingInput" value="100" min="1" max="1000">
+                                <span class="serving-unit">克</span>
+                            </div>
+                            <button class="serving-btn" id="servingPlus">+</button>
+                        </div>
+                        <div class="serving-quick">
+                            <button class="quick-btn" data-grams="50">50g</button>
+                            <button class="quick-btn active" data-grams="100">100g</button>
+                            <button class="quick-btn" data-grams="200">200g</button>
+                            <button class="quick-btn" data-grams="500">500g</button>
+                        </div>
+                        <div class="total-calorie">
+                            <span>总热量：</span>
+                            <strong id="totalCalorie">0 大卡</strong>
+                        </div>
+                    </div>
+
+                    <div class="result-actions">
+                        <button class="btn btn-outline" id="cancelResult">取消</button>
+                        <button class="btn btn-primary" id="saveResult">
+                            <span>记录摄入</span>
+                            <span>＋</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 历史记录页 -->
+            <section class="page page-history" id="page-history">
+                <div class="page-header">
+                    <h2>识别历史</h2>
+                    <button class="btn btn-danger btn-small" id="clearHistory">清空记录</button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <!-- 历史记录由JS动态生成 -->
+                </div>
+                <div class="empty-state" id="historyEmpty" style="display:none;">
+                    <div class="empty-icon">📭</div>
+                    <h3>暂无历史记录</h3>
+                    <p>开始识别你的第一份食物吧</p>
+                </div>
+            </section>
+
+            <!-- 每日统计页 -->
+            <section class="page page-stats" id="page-stats">
+                <div class="page-header">
+                    <h2>每日统计</h2>
+                    <div class="date-nav">
+                        <button class="date-btn" id="prevDay">‹</button>
+                        <span class="date-display" id="currentDate">今天</span>
+                        <button class="date-btn" id="nextDay">›</button>
+                    </div>
+                </div>
+
+                <div class="stats-summary">
+                    <div class="stats-calorie">
+                        <div class="stats-calorie-ring">
+                            <svg viewBox="0 0 120 120" class="ring-svg">
+                                <circle cx="60" cy="60" r="54" class="ring-bg"/>
+                                <circle cx="60" cy="60" r="54" class="ring-progress" id="calorieRing"/>
+                            </svg>
+                            <div class="ring-center">
+                                <span class="ring-value" id="todayCalories">0</span>
+                                <span class="ring-unit">大卡</span>
+                            </div>
+                        </div>
+                        <div class="calorie-goal">
+                            <span>目标：2000 大卡</span>
+                            <span id="calorieRemain">还剩 2000 大卡</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-nutrition">
+                        <div class="stat-item">
+                            <div class="stat-dot protein"></div>
+                            <div class="stat-info">
+                                <span class="stat-label">蛋白质</span>
+                                <span class="stat-value" id="todayProtein">0g</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-dot carbs"></div>
+                            <div class="stat-info">
+                                <span class="stat-label">碳水化合物</span>
+                                <span class="stat-value" id="todayCarbs">0g</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-dot fat"></div>
+                            <div class="stat-info">
+                                <span class="stat-label">脂肪</span>
+                                <span class="stat-value" id="todayFat">0g</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="today-meals">
+                    <h3>今日摄入</h3>
+                    <div class="meal-list" id="todayMealList">
+                        <!-- 今日餐食由JS动态生成 -->
+                    </div>
+                    <div class="empty-state" id="statsEmpty" style="display:none;">
+                        <div class="empty-icon">🍽️</div>
+                        <h3>今天还没有记录</h3>
+                        <p>记录食物，开始追踪你的营养摄入</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 食物库页 -->
+            <section class="page page-foods" id="page-foods">
+                <div class="page-header">
+                    <h2>食物数据库</h2>
+                    <span class="food-count" id="foodCount">0 种食物</span>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="librarySearch" placeholder="搜索食物...">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="food-library-list" id="foodLibraryList">
+                    <!-- 食物库由JS动态生成 -->
+                </div>
+            </section>
+        </main>
+
+        <!-- 加载中遮罩 -->
+        <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>AI 正在识别中...</p>
+            </div>
+        </div>
+
+        <!-- Toast 提示 -->
+        <div class="toast" id="toast" style="display:none;">
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script src="js/food-data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
